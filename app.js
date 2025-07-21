@@ -42,3 +42,13 @@ $('#pause').onclick = () => synth.pause();
 
 /* -------- ■ Detener -------- */
 $('#stop').onclick  = () => { synth.cancel(); utter = null; };
+
+
+$('#play').onclick = () => {
+  console.log('Play pulsado');          // AÑADE
+  …
+  utter = new SpeechSynthesisUtterance(txt);
+  utter.rate = rate();
+  console.log('Lanzando utter:', txt.slice(0,60));   // AÑADE
+  synth.speak(utter);
+};
