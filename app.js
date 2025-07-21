@@ -1,57 +1,89 @@
-/* app.js — versión con Pausa / Reanudar funcional */
+/* app.js – versión 3: arranque inmediato + Pausa/Reanudar sólido */
 
-const synth   = window.speechSynthesis;
-let   utter   = null;                 // Utterance en curso
+const synth = window.speechSynthesis;
+let   queue = [];          // frases individuales
+let   idx   = 0;           // índice actual
+let   paused = false;      // bandera de pausa
 
+/* ---------- referentes en el DOM ---------- */
 const fileInput  = document.getElementById('file');
 const rateSlider = document.getElementById('rate');
 const rateVal    = document.getElementById('val');
 const box        = document.getElementById('box');
 
-/* -------- Cargar archivo .txt local -------- */
+/* ---------- cargar archivo ---------- */
 fileInput.onchange = e => {
   const f = e.target.files[0];
   if (!f) return;
-  f.text().then(text => box.value = text);
+
+  f.text().then(text => {
+    box.value = text;
+    queue = splitText(text);
+    idx = 0;
+  });
 };
 
-/* -------- Cambiar velocidad sobre la marcha -------- */
+/* ---------- fraccionar texto ---------- */
+function splitText(text) {
+  return text
+    .split(/(?:\r?\n)+|(?<=[.!?])\s+/)   // salto de línea o punto
+    .map(t => t.trim())
+    .filter(Boolean);
+}
+
+/* ---------- control de velocidad ---------- */
 rateSlider.oninput = e => {
   const v = parseFloat(e.target.value);
   rateVal.textContent = v.toFixed(1);
-  if (utter) utter.rate = v;          // Se aplica a la próxima frase
 };
 
-/* -------- ▶ Leer / Reanudar -------- */
+/* ---------- reproducir ---------- */
 document.getElementById('play').onclick = () => {
-
-  /* 1. Reanudar si está en pausa */
-  if (synth.paused) {
+  /* Reanudar si estaba pausado */
+  if (paused) {
     synth.resume();
+    paused = false;
     return;
   }
 
-  /* 2. Ignorar si ya está hablando */
+  /* Si ya está hablando, ignorar */
   if (synth.speaking) return;
 
-  /* 3. Crear un nuevo utterance */
-  const text = box.value.trim();
-  if (!text) {
-    alert('Selecciona un archivo .txt primero');
+  if (!queue.length) {
+    alert('Carga primero un archivo .txt');
     return;
   }
-  utter = new SpeechSynthesisUtterance(text);
-  utter.rate = parseFloat(rateSlider.value);
-  synth.speak(utter);
+  idx = Math.max(0, idx);  // asegúrate
+
+  speakNext();
 };
 
-/* -------- ⏸ Pausa -------- */
+/* ---------- hablar la frase idx y encadenar ---------- */
+function speakNext() {
+  if (idx >= queue.length) return;
+
+  const utt = new SpeechSynthesisUtterance(queue[idx]);
+  utt.rate = parseFloat(rateSlider.value);
+
+  utt.onend = () => {
+    idx++;
+    if (!paused) speakNext();   // sigue encadenando si no está en pausa/stop
+  };
+
+  synth.speak(utt);
+}
+
+/* ---------- pausa ---------- */
 document.getElementById('pause').onclick = () => {
-  if (synth.speaking && !synth.paused) synth.pause();
+  if (synth.speaking) {
+    synth.pause();
+    paused = true;
+  }
 };
 
-/* -------- ■ Detener -------- */
+/* ---------- detener ---------- */
 document.getElementById('stop').onclick = () => {
-  synth.cancel();   // Vacía la cola
-  utter = null;     // Obliga a crear uno nuevo la próxima vez
+  synth.cancel();
+  paused = false;
+  idx = 0;
 };
