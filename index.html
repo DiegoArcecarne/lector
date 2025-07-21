@@ -1,32 +1,89 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <title>Lector de Documentos</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="manifest" href="manifest.json">
-  <style>
-    body{font-family:sans-serif;max-width:600px;margin:auto;text-align:center}
-    textarea{width:100%;height:220px;margin-top:10px}
-    input[type=file]{margin-top:10px}
-  </style>
+<meta charset="utf-8">
+<title>Lector Web</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root { --clr-play:#32b643; --clr-pause:#ffb700; --clr-stop:#ff4954; }
+body{font-family:sans-serif;margin:0;padding:1rem;max-width:600px;margin:auto;text-align:center}
+h1{font-size:1.3rem;margin:0 0 1rem}
+textarea{width:100%;height:35vh;resize:vertical;padding:.5rem;box-sizing:border-box}
+input[type=file]{display:none}
+label.upload{background:#1976d2;color:#fff;padding:.5rem 1rem;border-radius:.3rem;cursor:pointer;display:inline-block;margin-bottom:1rem}
+.speed{margin:1rem 0;display:flex;align-items:center;gap:.5rem}
+.speed input{flex:1}
+.buttons{display:flex;gap:.5rem;justify-content:center;margin-top:1rem}
+button{flex:1;padding:.5rem 0;font-size:1rem;border:none;color:#fff;border-radius:.3rem;cursor:pointer}
+#play{background:var(--clr-play)}
+#pause{background:var(--clr-pause)}
+#stop{background:var(--clr-stop)}
+button:active{opacity:.8}
+</style>
 </head>
 <body>
-<h1>Lector Web</h1>
+<h1>Lector de Documentos</h1>
 
-<input type="file" id="file" accept=".txt">
-<br><br>
+<!-- Carga de archivo -->
+<label class="upload">
+  Cargar archivo .txt
+  <input type="file" id="file" accept=".txt">
+</label>
 
-<label>Velocidad: <span id="val">1.0</span>x</label><br>
-<input type="range" id="rate" min="0.5" max="2" step="0.1" value="1">
-<br><br>
+<!-- Área de texto -->
+<textarea id="text" placeholder="Pega aquí texto o carga un archivo .txt"></textarea>
 
-<button id="play">▶ Leer</button>
-<button id="pause">⏸ Pausa</button>
-<button id="stop">■ Detener</button>
+<!-- Control de velocidad -->
+<div class="speed">
+  <span>Velocidad&nbsp;<b id="val">1.0</b>x</span>
+  <input type="range" id="rate" min="0.5" max="2" step="0.1" value="1">
+</div>
 
-<textarea id="box" readonly></textarea>
+<!-- Botones -->
+<div class="buttons">
+  <button id="play">▶ Leer</button>
+  <button id="pause">⏸ Pausa</button>
+  <button id="stop">■ Detener</button>
+</div>
 
-<script src="app.js"></script>
+<script>
+const synth = window.speechSynthesis;
+let utter = null;
+
+/* ---------- Cargar archivo ---------- */
+document.getElementById('file').addEventListener('change', e=>{
+  const f=e.target.files[0];
+  if(!f)return;
+  if(!f.name.toLowerCase().endsWith('.txt')){alert('Sólo .txt');return;}
+  const fr=new FileReader();
+  fr.onload=ev=>document.getElementById('text').value=ev.target.result;
+  fr.readAsText(f,'utf-8');
+});
+
+/* ---------- Control de velocidad ---------- */
+const rate = ()=>+document.getElementById('rate').value;
+document.getElementById('rate').oninput=e=>{
+  document.getElementById('val').textContent=e.target.value;
+  if(utter) utter.rate=rate();
+};
+
+/* ---------- Reproducir / Reanudar ---------- */
+document.getElementById('play').onclick=()=>{
+  if(synth.paused){ synth.resume(); return; }
+  if(synth.speaking){ synth.cancel(); }      // reinicia si ya hablaba
+  const txt=document.getElementById('text').value.trim();
+  if(!txt){ alert('No hay texto'); return; }
+  utter=new SpeechSynthesisUtterance(txt);
+  utter.lang='es-ES';
+  utter.rate=rate();
+  synth.speak(utter);
+};
+
+/* ---------- Pausa ---------- */
+document.getElementById('pause').onclick=()=> synth.pause();
+
+/* ---------- Detener ---------- */
+document.getElementById('stop').onclick=()=>{ synth.cancel(); utter=null; };
+</script>
 </body>
 </html>
