@@ -1,89 +1,44 @@
-/* app.js – versión 3: arranque inmediato + Pausa/Reanudar sólido */
+/* app.js – versión mínima funcional (Play / Pausa / Detener) */
 
 const synth = window.speechSynthesis;
-let   queue = [];          // frases individuales
-let   idx   = 0;           // índice actual
-let   paused = false;      // bandera de pausa
+let utter = null;                              // Utterance actual
 
-/* ---------- referentes en el DOM ---------- */
-const fileInput  = document.getElementById('file');
-const rateSlider = document.getElementById('rate');
-const rateVal    = document.getElementById('val');
-const box        = document.getElementById('box');
+const $     = id => document.getElementById(id);
+const rate  = () => parseFloat($('#rate').value);
 
-/* ---------- cargar archivo ---------- */
-fileInput.onchange = e => {
+/* -------- cargar archivo .txt -------- */
+$('#file').onchange = e => {
   const f = e.target.files[0];
   if (!f) return;
-
-  f.text().then(text => {
-    box.value = text;
-    queue = splitText(text);
-    idx = 0;
-  });
+  f.text().then(t => $('#box').value = t);
 };
 
-/* ---------- fraccionar texto ---------- */
-function splitText(text) {
-  return text
-    .split(/(?:\r?\n)+|(?<=[.!?])\s+/)   // salto de línea o punto
-    .map(t => t.trim())
-    .filter(Boolean);
-}
-
-/* ---------- control de velocidad ---------- */
-rateSlider.oninput = e => {
-  const v = parseFloat(e.target.value);
-  rateVal.textContent = v.toFixed(1);
+/* -------- cambiar velocidad -------- */
+$('#rate').oninput = e => {
+  $('#val').textContent = e.target.value;
+  if (utter) utter.rate = rate();              // se aplica en la frase siguiente
 };
 
-/* ---------- reproducir ---------- */
-document.getElementById('play').onclick = () => {
-  /* Reanudar si estaba pausado */
-  if (paused) {
-    synth.resume();
-    paused = false;
-    return;
-  }
+/* -------- ▶ Play / Reanudar -------- */
+$('#play').onclick = () => {
 
-  /* Si ya está hablando, ignorar */
+  // 1) Reanudar si estaba pausado
+  if (synth.paused) { synth.resume(); return; }
+
+  // 2) Si ya está hablando, no hagas nada
   if (synth.speaking) return;
 
-  if (!queue.length) {
-    alert('Carga primero un archivo .txt');
-    return;
-  }
-  idx = Math.max(0, idx);  // asegúrate
+  // 3) Crear un utterance nuevo
+  const txt = $('#box').value.trim();
+  if (!txt) return alert('Carga un .txt o escribe texto');
 
-  speakNext();
+  utter = new SpeechSynthesisUtterance(txt);
+  utter.rate = rate();
+  synth.speak(utter);
 };
 
-/* ---------- hablar la frase idx y encadenar ---------- */
-function speakNext() {
-  if (idx >= queue.length) return;
+/* -------- ⏸ Pausa -------- */
+$('#pause').onclick = () => synth.pause();
 
-  const utt = new SpeechSynthesisUtterance(queue[idx]);
-  utt.rate = parseFloat(rateSlider.value);
-
-  utt.onend = () => {
-    idx++;
-    if (!paused) speakNext();   // sigue encadenando si no está en pausa/stop
-  };
-
-  synth.speak(utt);
-}
-
-/* ---------- pausa ---------- */
-document.getElementById('pause').onclick = () => {
-  if (synth.speaking) {
-    synth.pause();
-    paused = true;
-  }
-};
-
-/* ---------- detener ---------- */
-document.getElementById('stop').onclick = () => {
-  synth.cancel();
-  paused = false;
-  idx = 0;
-};
+/* -------- ■ Detener -------- */
+$('#stop').onclick  = () => { synth.cancel(); utter = null; };
