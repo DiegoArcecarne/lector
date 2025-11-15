@@ -168,6 +168,11 @@ textarea:focus {
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  transition: height 0.2s;
+}
+
+.progress-bar-container:hover {
+  height: 16px;
 }
 
 .progress-bar {
@@ -175,7 +180,7 @@ textarea:focus {
   background: linear-gradient(90deg, var(--clr-primary), #42a5f5);
   border-radius: 6px;
   width: 0%;
-  transition: width 0.3s ease;
+  transition: width 0.1s linear;
 }
 
 .progress-info {
@@ -218,6 +223,12 @@ button:active {
   transform: translateY(0);
 }
 
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
 #play {
   background: var(--clr-play);
   flex: 1;
@@ -250,7 +261,7 @@ button:active {
   font-size: 0.9rem;
 }
 
-.nav-btn:hover {
+.nav-btn:hover:not(:disabled) {
   background: #616161;
 }
 
@@ -315,7 +326,7 @@ button:active {
 
     <!-- Control de velocidad -->
     <div class="speed-control">
-      <label>⚡ Velocidad</label>
+      <label>⚡ Velocidad (se aplica al siguiente fragmento)</label>
       <div class="speed-slider">
         <input type="range" id="rate" min="0.5" max="2.5" step="0.1" value="1">
         <span class="speed-value"><span id="val">1.0</span>x</span>
@@ -365,6 +376,7 @@ let textFragments = [];
 let currentFragmentIndex = 0;
 let isPaused = false;
 let isReading = false;
+let progressUpdateInterval = null;
 
 // ============================================
 // UTILIDADES
@@ -373,6 +385,7 @@ const $ = id => document.getElementById(id);
 
 function updateStatus(text) {
   $('status').textContent = text;
+  console.log('Estado:', text);
 }
 
 function updateProgress() {
@@ -389,17 +402,49 @@ function updateProgress() {
   $('progressPercent').textContent = Math.round(percent) + '%';
 }
 
+function updateButtonStates() {
+  const hasText = $('text').value.trim().length > 0;
+  const hasFragments = textFragments.length > 0;
+
+  $('play').disabled = !hasText;
+  $('pause').disabled = !isReading || isPaused;
+  $('stop').disabled = !isReading;
+  $('rewind').disabled = !hasFragments;
+  $('forward').disabled = !hasFragments;
+}
+
 // ============================================
 // FRAGMENTACIÓN DE TEXTO
 // ============================================
 function fragmentText(text) {
-  // Dividir por oraciones (punto, signos de exclamación/interrogación, saltos de línea)
-  const sentences = text.match(/[^.!?\n]+[.!?\n]+/g) || [text];
+  // Dividir por oraciones más pequeñas para mejor control
+  // Usa puntos, comas, punto y coma, y saltos de línea
+  const fragments = [];
+  const sentences = text.split(/([.!?;,\n]+)/);
 
-  // Filtrar fragmentos vacíos y limpiar
-  return sentences
-    .map(s => s.trim())
-    .filter(s => s.length > 0);
+  let currentFragment = '';
+  for (let i = 0; i < sentences.length; i++) {
+    const part = sentences[i].trim();
+    if (!part) continue;
+
+    currentFragment += part + ' ';
+
+    // Si termina con puntuación fuerte o el fragmento es largo, guardarlo
+    if (/[.!?\n]/.test(part) || currentFragment.length > 150) {
+      if (currentFragment.trim().length > 0) {
+        fragments.push(currentFragment.trim());
+        currentFragment = '';
+      }
+    }
+  }
+
+  // Agregar el último fragmento si quedó algo
+  if (currentFragment.trim().length > 0) {
+    fragments.push(currentFragment.trim());
+  }
+
+  console.log('Texto fragmentado en', fragments.length, 'partes');
+  return fragments;
 }
 
 // ============================================
@@ -433,6 +478,7 @@ $('file').addEventListener('change', async (e) => {
 
     $('text').value = text;
     updateStatus('Archivo cargado correctamente');
+    updateButtonStates();
   } catch (error) {
     console.error('Error cargando archivo:', error);
     alert('Error al cargar el archivo: ' + error.message);
@@ -463,12 +509,10 @@ async function loadDOCX(file) {
   return result.value;
 }
 
-// Cargar PPTX (básico - extrae texto plano)
+// Cargar PPTX (básico)
 async function loadPPTX(file) {
   try {
     const text = await file.text();
-    // PPTX es XML comprimido, intentar extraer algo de texto
-    // Esto es muy básico, idealmente usaríamos una librería específica
     const matches = text.match(/>([^<>]{10,})</g);
     if (matches) {
       return matches.map(m => m.slice(1, -1)).join('\n');
@@ -487,6 +531,13 @@ function loadVoices() {
   const voiceSelect = $('voiceSelect');
   voiceSelect.innerHTML = '';
 
+  console.log('Voces disponibles:', voices.length);
+
+  if (voices.length === 0) {
+    voiceSelect.innerHTML = '<option>No hay voces disponibles</option>';
+    return;
+  }
+
   // Filtrar voces en español primero
   const spanishVoices = voices.filter(v => v.lang.startsWith('es'));
   const otherVoices = voices.filter(v => !v.lang.startsWith('es'));
@@ -494,7 +545,7 @@ function loadVoices() {
   if (spanishVoices.length > 0) {
     const optgroup = document.createElement('optgroup');
     optgroup.label = 'Español';
-    spanishVoices.forEach((voice, index) => {
+    spanishVoices.forEach((voice) => {
       const option = document.createElement('option');
       option.value = voices.indexOf(voice);
       option.textContent = `${voice.name} (${voice.lang})`;
@@ -506,7 +557,7 @@ function loadVoices() {
   if (otherVoices.length > 0) {
     const optgroup = document.createElement('optgroup');
     optgroup.label = 'Otros idiomas';
-    otherVoices.forEach((voice, index) => {
+    otherVoices.forEach((voice) => {
       const option = document.createElement('option');
       option.value = voices.indexOf(voice);
       option.textContent = `${voice.name} (${voice.lang})`;
@@ -527,6 +578,19 @@ setTimeout(loadVoices, 100);
 // ============================================
 $('rate').oninput = (e) => {
   $('val').textContent = e.target.value;
+
+  // Si está leyendo, cancelar el fragmento actual y reiniciarlo con nueva velocidad
+  if (isReading && synth.speaking) {
+    console.log('Cambiando velocidad a', e.target.value);
+    synth.cancel();
+
+    // Esperar un poco y continuar con la nueva velocidad
+    setTimeout(() => {
+      if (isReading) {
+        speakFragment(currentFragmentIndex);
+      }
+    }, 100);
+  }
 };
 
 // ============================================
@@ -539,6 +603,7 @@ function speakFragment(index) {
     return;
   }
 
+  console.log('Hablando fragmento', index + 1, 'de', textFragments.length);
   currentFragmentIndex = index;
   updateProgress();
 
@@ -553,9 +618,11 @@ function speakFragment(index) {
 
   // Configurar velocidad
   currentUtterance.rate = parseFloat($('rate').value);
+  console.log('Velocidad aplicada:', currentUtterance.rate);
 
   // Evento al terminar: pasar al siguiente fragmento
   currentUtterance.onend = () => {
+    console.log('Fragmento terminado');
     if (isReading && !isPaused) {
       speakFragment(currentFragmentIndex + 1);
     }
@@ -563,12 +630,15 @@ function speakFragment(index) {
 
   currentUtterance.onerror = (e) => {
     console.error('Error en síntesis:', e);
-    stopReading();
-    updateStatus('Error en la síntesis de voz');
+    // No detener por errores menores, intentar continuar
+    if (isReading && !isPaused) {
+      setTimeout(() => speakFragment(currentFragmentIndex + 1), 100);
+    }
   };
 
   synth.speak(currentUtterance);
   updateStatus(`Leyendo fragmento ${index + 1}/${textFragments.length}...`);
+  updateButtonStates();
 }
 
 function startReading() {
@@ -578,6 +648,8 @@ function startReading() {
     return;
   }
 
+  console.log('Iniciando lectura');
+
   // Fragmentar texto si es la primera vez
   if (textFragments.length === 0 || !isReading) {
     textFragments = fragmentText(text);
@@ -586,26 +658,32 @@ function startReading() {
 
   isReading = true;
   isPaused = false;
+  updateButtonStates();
   speakFragment(currentFragmentIndex);
 }
 
 function pauseReading() {
   if (synth.speaking && !isPaused) {
+    console.log('Pausando');
     synth.pause();
     isPaused = true;
     updateStatus('Pausado');
+    updateButtonStates();
   }
 }
 
 function resumeReading() {
   if (isPaused) {
+    console.log('Reanudando');
     synth.resume();
     isPaused = false;
     updateStatus(`Leyendo fragmento ${currentFragmentIndex + 1}/${textFragments.length}...`);
+    updateButtonStates();
   }
 }
 
 function stopReading() {
+  console.log('Deteniendo');
   synth.cancel();
   isReading = false;
   isPaused = false;
@@ -614,6 +692,7 @@ function stopReading() {
   currentFragmentIndex = 0;
   updateProgress();
   updateStatus('Detenido');
+  updateButtonStates();
 }
 
 // ============================================
@@ -622,13 +701,15 @@ function stopReading() {
 function rewind() {
   if (textFragments.length === 0) return;
 
+  console.log('Retrocediendo desde fragmento', currentFragmentIndex);
   synth.cancel();
 
-  // Retroceder aproximadamente 15 segundos (estimamos ~3-5 fragmentos)
+  // Retroceder 4 fragmentos (aproximadamente 15 segundos)
   const newIndex = Math.max(0, currentFragmentIndex - 4);
+  console.log('Nuevo índice:', newIndex);
 
   if (isReading) {
-    speakFragment(newIndex);
+    setTimeout(() => speakFragment(newIndex), 100);
   } else {
     currentFragmentIndex = newIndex;
     updateProgress();
@@ -638,13 +719,15 @@ function rewind() {
 function forward() {
   if (textFragments.length === 0) return;
 
+  console.log('Avanzando desde fragmento', currentFragmentIndex);
   synth.cancel();
 
-  // Avanzar aproximadamente 15 segundos (estimamos ~3-5 fragmentos)
+  // Avanzar 4 fragmentos (aproximadamente 15 segundos)
   const newIndex = Math.min(textFragments.length - 1, currentFragmentIndex + 4);
+  console.log('Nuevo índice:', newIndex);
 
   if (isReading) {
-    speakFragment(newIndex);
+    setTimeout(() => speakFragment(newIndex), 100);
   } else {
     currentFragmentIndex = newIndex;
     updateProgress();
@@ -655,17 +738,21 @@ function forward() {
 // BARRA DE PROGRESO ACCIONABLE
 // ============================================
 $('progressContainer').addEventListener('click', (e) => {
-  if (textFragments.length === 0) return;
+  if (textFragments.length === 0) {
+    console.log('No hay fragmentos para navegar');
+    return;
+  }
 
   const rect = e.currentTarget.getBoundingClientRect();
   const clickX = e.clientX - rect.left;
   const percent = clickX / rect.width;
   const newIndex = Math.floor(percent * textFragments.length);
 
+  console.log('Click en barra, saltando a fragmento', newIndex);
   synth.cancel();
 
   if (isReading) {
-    speakFragment(newIndex);
+    setTimeout(() => speakFragment(newIndex), 100);
   } else {
     currentFragmentIndex = newIndex;
     updateProgress();
@@ -676,6 +763,7 @@ $('progressContainer').addEventListener('click', (e) => {
 // EVENTOS DE BOTONES
 // ============================================
 $('play').onclick = () => {
+  console.log('Click en Play, isPaused:', isPaused, 'isReading:', isReading);
   if (isPaused) {
     resumeReading();
   } else {
@@ -684,19 +772,28 @@ $('play').onclick = () => {
 };
 
 $('pause').onclick = () => {
+  console.log('Click en Pause');
   pauseReading();
 };
 
 $('stop').onclick = () => {
+  console.log('Click en Stop');
   stopReading();
 };
 
 $('rewind').onclick = () => {
+  console.log('Click en Rewind');
   rewind();
 };
 
 $('forward').onclick = () => {
+  console.log('Click en Forward');
   forward();
+};
+
+// Actualizar estado de botones cuando cambie el texto
+$('text').oninput = () => {
+  updateButtonStates();
 };
 
 // ============================================
@@ -706,6 +803,9 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs
 
 updateStatus('Listo para leer');
 updateProgress();
+updateButtonStates();
+
+console.log('Lector Avanzado inicializado');
 </script>
 </body>
 </html>
