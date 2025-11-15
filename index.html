@@ -2,88 +2,710 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<title>Lector Web</title>
+<title>Lector Avanzado</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="manifest" href="manifest.json">
 <style>
-:root { --clr-play:#32b643; --clr-pause:#ffb700; --clr-stop:#ff4954; }
-body{font-family:sans-serif;margin:0;padding:1rem;max-width:600px;margin:auto;text-align:center}
-h1{font-size:1.3rem;margin:0 0 1rem}
-textarea{width:100%;height:35vh;resize:vertical;padding:.5rem;box-sizing:border-box}
-input[type=file]{display:none}
-label.upload{background:#1976d2;color:#fff;padding:.5rem 1rem;border-radius:.3rem;cursor:pointer;display:inline-block;margin-bottom:1rem}
-.speed{margin:1rem 0;display:flex;align-items:center;gap:.5rem}
-.speed input{flex:1}
-.buttons{display:flex;gap:.5rem;justify-content:center;margin-top:1rem}
-button{flex:1;padding:.5rem 0;font-size:1rem;border:none;color:#fff;border-radius:.3rem;cursor:pointer}
-#play{background:var(--clr-play)}
-#pause{background:var(--clr-pause)}
-#stop{background:var(--clr-stop)}
-button:active{opacity:.8}
+:root {
+  --clr-primary: #1976d2;
+  --clr-play: #32b643;
+  --clr-pause: #ffb700;
+  --clr-stop: #ff4954;
+  --clr-bg: #f5f5f5;
+  --clr-card: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  margin: 0;
+  padding: 1rem;
+  background: var(--clr-bg);
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 800px;
+  margin: auto;
+}
+
+h1 {
+  font-size: 1.8rem;
+  margin: 0 0 1.5rem;
+  text-align: center;
+  color: var(--clr-primary);
+}
+
+.card {
+  background: var(--clr-card);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Carga de archivo */
+.upload-section {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+input[type=file] {
+  display: none;
+}
+
+label.upload-btn {
+  background: var(--clr-primary);
+  color: #fff;
+  padding: 0.6rem 1.2rem;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+label.upload-btn:hover {
+  background: #1565c0;
+}
+
+.filename {
+  font-size: 0.85rem;
+  color: #666;
+  padding: 0.3rem 0;
+  font-style: italic;
+}
+
+/* Área de texto */
+textarea {
+  width: 100%;
+  min-height: 200px;
+  resize: vertical;
+  padding: 0.8rem;
+  border: 2px solid #ddd;
+  border-radius: 0.3rem;
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: var(--clr-primary);
+}
+
+/* Selector de voz */
+.voice-selector {
+  margin: 1rem 0;
+}
+
+.voice-selector label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.voice-selector select {
+  width: 100%;
+  padding: 0.6rem;
+  border: 2px solid #ddd;
+  border-radius: 0.3rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  background: white;
+}
+
+/* Control de velocidad */
+.speed-control {
+  margin: 1rem 0;
+}
+
+.speed-control label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.speed-slider {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.speed-slider input[type=range] {
+  flex: 1;
+  cursor: pointer;
+}
+
+.speed-value {
+  min-width: 50px;
+  text-align: center;
+  font-weight: bold;
+  color: var(--clr-primary);
+  font-size: 1.1rem;
+}
+
+/* Barra de progreso */
+.progress-section {
+  margin: 1.5rem 0;
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 12px;
+  background: #e0e0e0;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--clr-primary), #42a5f5);
+  border-radius: 6px;
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+/* Controles principales */
+.main-controls {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin: 1rem 0;
+  flex-wrap: wrap;
+}
+
+button {
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  border: none;
+  color: #fff;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+#play {
+  background: var(--clr-play);
+  flex: 1;
+  min-width: 120px;
+}
+
+#pause {
+  background: var(--clr-pause);
+  flex: 1;
+  min-width: 120px;
+}
+
+#stop {
+  background: var(--clr-stop);
+  flex: 1;
+  min-width: 120px;
+}
+
+/* Controles de navegación */
+.nav-controls {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+.nav-btn {
+  background: #757575;
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+}
+
+.nav-btn:hover {
+  background: #616161;
+}
+
+/* Indicador de estado */
+.status-indicator {
+  text-align: center;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+  color: #666;
+  font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .container {
+    padding: 0.5rem;
+  }
+
+  h1 {
+    font-size: 1.4rem;
+  }
+
+  .card {
+    padding: 1rem;
+  }
+
+  .main-controls button {
+    min-width: 100px;
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+  }
+}
 </style>
 </head>
 <body>
-<h1>Lector de Documentos</h1>
+<div class="container">
+  <h1>📖 Lector Avanzado de Documentos</h1>
 
-<!-- Carga de archivo -->
-<label class="upload">
-  Cargar archivo .txt
-  <input type="file" id="file" accept=".txt">
-</label>
+  <!-- Carga de archivos -->
+  <div class="card">
+    <div class="upload-section">
+      <label class="upload-btn">
+        📄 Cargar Documento
+        <input type="file" id="file" accept=".txt,.pdf,.docx,.pptx,.ppt,.doc,.odt">
+      </label>
+    </div>
+    <div class="filename" id="filename">Ningún archivo seleccionado</div>
 
-<!-- Área de texto -->
-<textarea id="text" placeholder="Pega aquí texto o carga un archivo .txt"></textarea>
+    <!-- Área de texto -->
+    <textarea id="text" placeholder="Pega aquí tu texto o carga un documento (.txt, .pdf, .docx, .pptx)"></textarea>
+  </div>
 
-<!-- Control de velocidad -->
-<div class="speed">
-  <span>Velocidad&nbsp;<b id="val">1.0</b>x</span>
-  <input type="range" id="rate" min="0.5" max="2" step="0.1" value="1">
+  <!-- Controles -->
+  <div class="card">
+    <!-- Selector de voz -->
+    <div class="voice-selector">
+      <label>🗣️ Voz</label>
+      <select id="voiceSelect">
+        <option>Cargando voces...</option>
+      </select>
+    </div>
+
+    <!-- Control de velocidad -->
+    <div class="speed-control">
+      <label>⚡ Velocidad</label>
+      <div class="speed-slider">
+        <input type="range" id="rate" min="0.5" max="2.5" step="0.1" value="1">
+        <span class="speed-value"><span id="val">1.0</span>x</span>
+      </div>
+    </div>
+
+    <!-- Barra de progreso -->
+    <div class="progress-section">
+      <div class="progress-bar-container" id="progressContainer">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <div class="progress-info">
+        <span id="currentFragment">Fragmento: 0/0</span>
+        <span id="progressPercent">0%</span>
+      </div>
+    </div>
+
+    <!-- Controles principales -->
+    <div class="main-controls">
+      <button id="play">▶️ Reproducir</button>
+      <button id="pause">⏸️ Pausa</button>
+      <button id="stop">⏹️ Detener</button>
+    </div>
+
+    <!-- Controles de navegación -->
+    <div class="nav-controls">
+      <button class="nav-btn" id="rewind">⏪ -15s</button>
+      <button class="nav-btn" id="forward">⏩ +15s</button>
+    </div>
+
+    <div class="status-indicator" id="status">Listo para leer</div>
+  </div>
 </div>
 
-<!-- Botones -->
-<div class="buttons">
-  <button id="play">▶ Leer</button>
-  <button id="pause">⏸ Pausa</button>
-  <button id="stop">■ Detener</button>
-</div>
+<!-- Librerías externas -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 
 <script>
+// ============================================
+// VARIABLES GLOBALES
+// ============================================
 const synth = window.speechSynthesis;
-let utter = null;
+let voices = [];
+let currentUtterance = null;
+let textFragments = [];
+let currentFragmentIndex = 0;
+let isPaused = false;
+let isReading = false;
 
-/* ---------- Cargar archivo ---------- */
-document.getElementById('file').addEventListener('change', e=>{
-  const f=e.target.files[0];
-  if(!f)return;
-  if(!f.name.toLowerCase().endsWith('.txt')){alert('Sólo .txt');return;}
-  const fr=new FileReader();
-  fr.onload=ev=>document.getElementById('text').value=ev.target.result;
-  fr.readAsText(f,'utf-8');
+// ============================================
+// UTILIDADES
+// ============================================
+const $ = id => document.getElementById(id);
+
+function updateStatus(text) {
+  $('status').textContent = text;
+}
+
+function updateProgress() {
+  if (textFragments.length === 0) {
+    $('progressBar').style.width = '0%';
+    $('currentFragment').textContent = 'Fragmento: 0/0';
+    $('progressPercent').textContent = '0%';
+    return;
+  }
+
+  const percent = ((currentFragmentIndex + 1) / textFragments.length) * 100;
+  $('progressBar').style.width = percent + '%';
+  $('currentFragment').textContent = `Fragmento: ${currentFragmentIndex + 1}/${textFragments.length}`;
+  $('progressPercent').textContent = Math.round(percent) + '%';
+}
+
+// ============================================
+// FRAGMENTACIÓN DE TEXTO
+// ============================================
+function fragmentText(text) {
+  // Dividir por oraciones (punto, signos de exclamación/interrogación, saltos de línea)
+  const sentences = text.match(/[^.!?\n]+[.!?\n]+/g) || [text];
+
+  // Filtrar fragmentos vacíos y limpiar
+  return sentences
+    .map(s => s.trim())
+    .filter(s => s.length > 0);
+}
+
+// ============================================
+// CARGA DE ARCHIVOS
+// ============================================
+$('file').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  $('filename').textContent = `📎 ${file.name}`;
+  updateStatus('Cargando archivo...');
+
+  try {
+    let text = '';
+    const extension = file.name.toLowerCase().split('.').pop();
+
+    if (extension === 'txt') {
+      text = await file.text();
+    } else if (extension === 'pdf') {
+      text = await loadPDF(file);
+    } else if (extension === 'docx' || extension === 'doc') {
+      text = await loadDOCX(file);
+    } else if (extension === 'pptx' || extension === 'ppt') {
+      text = await loadPPTX(file);
+    } else if (extension === 'odt') {
+      text = await file.text();
+    } else {
+      alert('Formato no soportado. Use: .txt, .pdf, .docx, .pptx');
+      return;
+    }
+
+    $('text').value = text;
+    updateStatus('Archivo cargado correctamente');
+  } catch (error) {
+    console.error('Error cargando archivo:', error);
+    alert('Error al cargar el archivo: ' + error.message);
+    updateStatus('Error al cargar archivo');
+  }
 });
 
-/* ---------- Control de velocidad ---------- */
-const rate = ()=>+document.getElementById('rate').value;
-document.getElementById('rate').oninput=e=>{
-  document.getElementById('val').textContent=e.target.value;
-  if(utter) utter.rate=rate();
+// Cargar PDF
+async function loadPDF(file) {
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  let fullText = '';
+
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const textContent = await page.getTextContent();
+    const pageText = textContent.items.map(item => item.str).join(' ');
+    fullText += pageText + '\n\n';
+  }
+
+  return fullText;
+}
+
+// Cargar DOCX
+async function loadDOCX(file) {
+  const arrayBuffer = await file.arrayBuffer();
+  const result = await mammoth.extractRawText({ arrayBuffer });
+  return result.value;
+}
+
+// Cargar PPTX (básico - extrae texto plano)
+async function loadPPTX(file) {
+  try {
+    const text = await file.text();
+    // PPTX es XML comprimido, intentar extraer algo de texto
+    // Esto es muy básico, idealmente usaríamos una librería específica
+    const matches = text.match(/>([^<>]{10,})</g);
+    if (matches) {
+      return matches.map(m => m.slice(1, -1)).join('\n');
+    }
+    return text;
+  } catch (error) {
+    throw new Error('Error al leer presentación. Intente convertir a PDF primero.');
+  }
+}
+
+// ============================================
+// VOCES
+// ============================================
+function loadVoices() {
+  voices = synth.getVoices();
+  const voiceSelect = $('voiceSelect');
+  voiceSelect.innerHTML = '';
+
+  // Filtrar voces en español primero
+  const spanishVoices = voices.filter(v => v.lang.startsWith('es'));
+  const otherVoices = voices.filter(v => !v.lang.startsWith('es'));
+
+  if (spanishVoices.length > 0) {
+    const optgroup = document.createElement('optgroup');
+    optgroup.label = 'Español';
+    spanishVoices.forEach((voice, index) => {
+      const option = document.createElement('option');
+      option.value = voices.indexOf(voice);
+      option.textContent = `${voice.name} (${voice.lang})`;
+      optgroup.appendChild(option);
+    });
+    voiceSelect.appendChild(optgroup);
+  }
+
+  if (otherVoices.length > 0) {
+    const optgroup = document.createElement('optgroup');
+    optgroup.label = 'Otros idiomas';
+    otherVoices.forEach((voice, index) => {
+      const option = document.createElement('option');
+      option.value = voices.indexOf(voice);
+      option.textContent = `${voice.name} (${voice.lang})`;
+      optgroup.appendChild(option);
+    });
+    voiceSelect.appendChild(optgroup);
+  }
+}
+
+// Cargar voces al iniciar y cuando cambien
+if (synth.onvoiceschanged !== undefined) {
+  synth.onvoiceschanged = loadVoices;
+}
+setTimeout(loadVoices, 100);
+
+// ============================================
+// CONTROL DE VELOCIDAD
+// ============================================
+$('rate').oninput = (e) => {
+  $('val').textContent = e.target.value;
 };
 
-/* ---------- Reproducir / Reanudar ---------- */
-document.getElementById('play').onclick=()=>{
-  if(synth.paused){ synth.resume(); return; }
-  if(synth.speaking){ synth.cancel(); }      // reinicia si ya hablaba
-  const txt=document.getElementById('text').value.trim();
-  if(!txt){ alert('No hay texto'); return; }
-  utter=new SpeechSynthesisUtterance(txt);
-  utter.lang='es-ES';
-  utter.rate=rate();
-  synth.speak(utter);
+// ============================================
+// REPRODUCCIÓN
+// ============================================
+function speakFragment(index) {
+  if (index >= textFragments.length || index < 0) {
+    stopReading();
+    updateStatus('Lectura completada');
+    return;
+  }
+
+  currentFragmentIndex = index;
+  updateProgress();
+
+  const text = textFragments[index];
+  currentUtterance = new SpeechSynthesisUtterance(text);
+
+  // Configurar voz
+  const selectedVoiceIndex = $('voiceSelect').value;
+  if (voices[selectedVoiceIndex]) {
+    currentUtterance.voice = voices[selectedVoiceIndex];
+  }
+
+  // Configurar velocidad
+  currentUtterance.rate = parseFloat($('rate').value);
+
+  // Evento al terminar: pasar al siguiente fragmento
+  currentUtterance.onend = () => {
+    if (isReading && !isPaused) {
+      speakFragment(currentFragmentIndex + 1);
+    }
+  };
+
+  currentUtterance.onerror = (e) => {
+    console.error('Error en síntesis:', e);
+    stopReading();
+    updateStatus('Error en la síntesis de voz');
+  };
+
+  synth.speak(currentUtterance);
+  updateStatus(`Leyendo fragmento ${index + 1}/${textFragments.length}...`);
+}
+
+function startReading() {
+  const text = $('text').value.trim();
+  if (!text) {
+    alert('No hay texto para leer');
+    return;
+  }
+
+  // Fragmentar texto si es la primera vez
+  if (textFragments.length === 0 || !isReading) {
+    textFragments = fragmentText(text);
+    currentFragmentIndex = 0;
+  }
+
+  isReading = true;
+  isPaused = false;
+  speakFragment(currentFragmentIndex);
+}
+
+function pauseReading() {
+  if (synth.speaking && !isPaused) {
+    synth.pause();
+    isPaused = true;
+    updateStatus('Pausado');
+  }
+}
+
+function resumeReading() {
+  if (isPaused) {
+    synth.resume();
+    isPaused = false;
+    updateStatus(`Leyendo fragmento ${currentFragmentIndex + 1}/${textFragments.length}...`);
+  }
+}
+
+function stopReading() {
+  synth.cancel();
+  isReading = false;
+  isPaused = false;
+  currentUtterance = null;
+  textFragments = [];
+  currentFragmentIndex = 0;
+  updateProgress();
+  updateStatus('Detenido');
+}
+
+// ============================================
+// NAVEGACIÓN (AVANZAR/RETROCEDER)
+// ============================================
+function rewind() {
+  if (textFragments.length === 0) return;
+
+  synth.cancel();
+
+  // Retroceder aproximadamente 15 segundos (estimamos ~3-5 fragmentos)
+  const newIndex = Math.max(0, currentFragmentIndex - 4);
+
+  if (isReading) {
+    speakFragment(newIndex);
+  } else {
+    currentFragmentIndex = newIndex;
+    updateProgress();
+  }
+}
+
+function forward() {
+  if (textFragments.length === 0) return;
+
+  synth.cancel();
+
+  // Avanzar aproximadamente 15 segundos (estimamos ~3-5 fragmentos)
+  const newIndex = Math.min(textFragments.length - 1, currentFragmentIndex + 4);
+
+  if (isReading) {
+    speakFragment(newIndex);
+  } else {
+    currentFragmentIndex = newIndex;
+    updateProgress();
+  }
+}
+
+// ============================================
+// BARRA DE PROGRESO ACCIONABLE
+// ============================================
+$('progressContainer').addEventListener('click', (e) => {
+  if (textFragments.length === 0) return;
+
+  const rect = e.currentTarget.getBoundingClientRect();
+  const clickX = e.clientX - rect.left;
+  const percent = clickX / rect.width;
+  const newIndex = Math.floor(percent * textFragments.length);
+
+  synth.cancel();
+
+  if (isReading) {
+    speakFragment(newIndex);
+  } else {
+    currentFragmentIndex = newIndex;
+    updateProgress();
+  }
+});
+
+// ============================================
+// EVENTOS DE BOTONES
+// ============================================
+$('play').onclick = () => {
+  if (isPaused) {
+    resumeReading();
+  } else {
+    startReading();
+  }
 };
 
-/* ---------- Pausa ---------- */
-document.getElementById('pause').onclick=()=> synth.pause();
+$('pause').onclick = () => {
+  pauseReading();
+};
 
-/* ---------- Detener ---------- */
-document.getElementById('stop').onclick=()=>{ synth.cancel(); utter=null; };
+$('stop').onclick = () => {
+  stopReading();
+};
+
+$('rewind').onclick = () => {
+  rewind();
+};
+
+$('forward').onclick = () => {
+  forward();
+};
+
+// ============================================
+// INICIALIZACIÓN
+// ============================================
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+updateStatus('Listo para leer');
+updateProgress();
 </script>
 </body>
 </html>
