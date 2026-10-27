@@ -63,4 +63,3 @@ Prueba cambios aislados: dos ganchos con el mismo desarrollo, o dos motivaciones
 - [F5] GOV.UK, «Use the right tone» y «Use clear language». https://guidance.publishing.service.gov.uk/writing-to-gov-uk-standards/writing-guidelines/right-tone/
 - [F6] Journal of Communication, «Long-term Persuasive Effects in Narrative Communication Research: A Meta-Analysis» (2020). https://academic.oup.com/joc/article/70/4/473/5880130
 - [F7] BOE, Ley 3/1991, de Competencia Desleal, arts. 5 y 7. https://www.boe.es/buscar/act.php?id=BOE-A-1991-628
-- [F8] Meat Science, Dunne et al., «Colour of bovine subcutaneous adipose tissue: A review…» (2009). https://pubmed.ncbi.nlm.nih.gov/22063959/
