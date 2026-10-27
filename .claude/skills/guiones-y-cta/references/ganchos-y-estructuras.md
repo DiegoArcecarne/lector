@@ -3,10 +3,10 @@
 ## Ocho entradas que puedes alternar
 
 - **Una consecuencia que importa.** «Una mala pieza puede hacerte perder algo más que una venta: las ganas de volver de un cliente».
-- **Una equivocación habitual.** «La grasa amarilla por sí sola no demuestra que una pieza sea buey».
+- **Una equivocación habitual.** «Tener más seguidores no significa que tus redes vendan más».
 - **Una escena cotidiana.** «El viaje todavía no ha empezado y ya llevas tres semanas cruzando correos».
 - **Un contraste observable.** «Estos dos cortes parecen muy parecidos, pero no se comportan igual en la parrilla».
-- **Una pregunta concreta.** «¿Qué estás mirando cuando eliges carne para tu restaurante?».
+- **Una pregunta concreta.** «¿Qué estás mirando cuando eliges proveedor para tu negocio?».
 - **Una demostración.** Mostrar el corte, el documento o el detalle antes de explicarlo: «Fíjate en esta zona».
 - **Una objeción real.** «Si te preocupa que organizar el viaje te quite demasiado tiempo, mira esto».
 - **Una decisión difícil.** «Puedes gastar más en anuncios o averiguar primero dónde se pierde el dinero».
@@ -17,7 +17,7 @@ No prometas una revelación espectacular para acabar dando un consejo común.
 
 | Flojo | Más útil |
 |---|---|
-| «Hoy os traemos un vídeo sobre los beneficios de consumir carne de calidad». | «Si vas a pagar por un buen corte, hay tres cosas que deberías comprobar antes». |
+| «Hoy os traemos un vídeo sobre los beneficios de elegir bien a tu proveedor». | «Si vas a pagar más por un producto, hay tres cosas que deberías comprobar antes». |
 | «Organizar viajes escolares puede ser una tarea complicada». | «Cuando te toca organizar el viaje de una clase, el lío empieza al intentar cuadrar alojamiento, actividades y comidas». |
 | «Mejora tus resultados con una estrategia eficaz». | «Tus anuncios pueden vender más y, aun así, dejarte menos dinero del que crees». |
 
@@ -25,7 +25,7 @@ No prometas una revelación espectacular para acabar dando un consejo común.
 
 Seis recursos: mostrar una consecuencia, resolver una parte de la duda, abrir una comparación, enseñar una prueba, anticipar una objeción y cambiar de plano cuando ayuda a entender.
 
-**Ejemplo de avance:** «A simple vista las dos piezas parecen iguales. Pero esta tiene otra distribución de grasa. Eso cambia cómo se cocina. Y si te pasas de tiempo, puedes echar a perder lo que has pagado». Avanza de la observación a una consecuencia que el comprador entiende.
+**Ejemplo de avance:** «A simple vista las dos campañas parecen iguales: venden lo mismo. Pero una te cuesta el doble por cliente. Eso cambia lo que te queda de cada venta. Y si subes el presupuesto en la equivocada, pierdes más cuanto más vendes». Avanza de la observación a una consecuencia que el comprador entiende.
 
 Un montaje rápido puede ayudar, pero no arregla una historia que no tiene nada que contar.
 
@@ -70,9 +70,9 @@ Las plataformas sitúan gran parte de la atención en los primeros segundos y re
 
 **Estructura base:** acción del cliente + resultado final que desea alcanzar.
 
-- «Síguenos para convertirte en un experto en carne de calidad».
+- «Síguenos para aprender a elegir con criterio lo que compras».
 - «Comenta EQUIPAJE y recibe la lista para ahorrar tiempo preparando el viaje».
-- «Compra buey para tu restaurante y sorprende a tus clientes con su sabor».
+- «Compra [producto] para tu negocio y sorprende a tus clientes».
 - «Solicita una valoración y empieza a recuperar el potencial de tu obra».
 
 Reglas:
@@ -80,7 +80,7 @@ Reglas:
 - Puede durar más de tres segundos si hace falta para comunicar el beneficio. Prioriza una acción clara.
 - Se pueden unir dos beneficios cuando uno lleva al otro (ahorrar gestiones y disfrutar más del viaje).
 - El beneficio se logra después, no al pulsar; no lo rebajes por explicar el trámite.
-- La última idea del desarrollo prepara el cierre: si explicaste cómo evitar compras equivocadas, invita a aprender a comprar mejor; si mostraste la carne que quiere un restaurante, invita a comprarla.
+- La última idea del desarrollo prepara el cierre: si explicaste cómo evitar compras equivocadas, invita a aprender a comprar mejor; si mostraste el producto que busca el comprador, invita a comprarlo.
 - No metas un CTA de compra tras una explicación genérica si el público aún necesita prueba. No pidas seguir la cuenta a un comprador preparado para pedir.
 - El destino del clic debe cumplir lo anunciado.
 
